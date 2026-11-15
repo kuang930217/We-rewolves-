@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#171322">
+<title>殺盤推演｜We’re wolves</title>
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#14111d;--bg-glow:#251b35;--panel:#201b2b;--panel-2:#292236;--panel-3:#30283e;
+  --text:#f1edf7;--muted:#aaa0b9;--line:#3b324b;--accent:#b79add;--accent-strong:#8d6bb8;
+  --accent-soft:#382c4b;--gold:#d6b875;--green:#7db79e;--red:#d78391;--blue:#83a6d0;
+  --input:#191522;--shadow:0 18px 48px rgba(0,0,0,.23);--radius:18px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;min-height:100vh;background:radial-gradient(circle at 8% -10%,var(--bg-glow),transparent 35%),var(--bg);color:var(--text);font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;line-height:1.55;transition:background .2s,color .2s}
+button,input,select,textarea{font:inherit}button{cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+body[data-theme="light"]{color-scheme:light;--bg:#f3f0f7;--bg-glow:#e5dcf0;--panel:#fff;--panel-2:#f8f5fb;--panel-3:#eee8f5;--text:#292333;--muted:#81788d;--line:#e4ddeb;--accent:#7959a5;--accent-strong:#5e4388;--accent-soft:#eee7f6;--gold:#9e7d38;--green:#397d61;--red:#b65d6e;--blue:#527cae;--input:#fff;--shadow:0 14px 36px rgba(49,34,69,.08)}
+body[data-theme="blue"]{--bg:#111923;--bg-glow:#1b3448;--panel:#192532;--panel-2:#202f3e;--panel-3:#293b4c;--text:#eaf2f8;--muted:#9bafbf;--line:#34485a;--accent:#8db9d7;--accent-strong:#568db4;--accent-soft:#263e51;--input:#151f2a;--green:#7db79e;--red:#d78391;--blue:#8db9d7}
+body[data-theme="forest"]{--bg:#121a17;--bg-glow:#20372d;--panel:#1b2822;--panel-2:#24342c;--panel-3:#2c4036;--text:#edf4ef;--muted:#a0b3a7;--line:#3a5044;--accent:#9fc8a9;--accent-strong:#608f70;--accent-soft:#294235;--input:#16201b;--green:#9fc8a9;--red:#d78391;--blue:#8fb2c4}
+body[data-theme="rose"]{--bg:#1b141a;--bg-glow:#3b2432;--panel:#2a2029;--panel-2:#352832;--panel-3:#42313e;--text:#f5edf2;--muted:#b7a0ae;--line:#4b3947;--accent:#d6a2bc;--accent-strong:#a9698a;--accent-soft:#493044;--input:#211820;--green:#8fbd9f;--red:#dc8998;--blue:#9aadd0}
+.app-shell{max-width:1500px;margin:0 auto;padding:24px 30px 56px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:20px}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}.brand-mark{width:43px;height:43px;flex:none;border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);border-radius:14px;background:linear-gradient(145deg,var(--accent-strong),var(--accent-soft));color:#fff;display:grid;place-items:center;font-size:21px;box-shadow:0 8px 22px color-mix(in srgb,var(--accent-strong) 30%,transparent)}
+.brand h1{margin:0;font-family:Georgia,"Noto Serif TC",serif;font-size:25px;letter-spacing:.07em;font-weight:700;white-space:nowrap}.brand h1 span{font:600 12px ui-sans-serif,sans-serif;letter-spacing:.12em;color:var(--muted);margin-left:6px;vertical-align:middle}
+.top-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}.theme-switcher{display:flex;align-items:center;gap:5px;padding:4px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}.theme-btn{display:flex;align-items:center;gap:5px;border:1px solid transparent;border-radius:8px;padding:6px 8px;background:transparent;color:var(--muted);font-size:11px;font-weight:700}.theme-btn .swatch{width:10px;height:10px;border-radius:50%;background:var(--swatch);box-shadow:0 0 0 2px color-mix(in srgb,var(--swatch) 25%,transparent)}.theme-btn.active{border-color:var(--line);background:var(--panel-3);color:var(--text)}
+.btn{border:1px solid var(--line);background:var(--panel-2);color:var(--text);padding:9px 12px;border-radius:11px;font-size:12px;font-weight:700;transition:.16s}.btn:hover{border-color:var(--accent);transform:translateY(-1px)}.btn.primary{background:var(--accent-strong);border-color:var(--accent-strong);color:#fff}.btn.primary:hover{filter:brightness(1.08)}.btn.danger{color:var(--red);border-color:color-mix(in srgb,var(--red) 38%,var(--line));background:transparent}.btn.small{padding:6px 9px;border-radius:8px;font-size:11px}.btn.icon{width:34px;height:34px;padding:0;display:inline-grid;place-items:center}
+.nav{display:flex;gap:6px;padding:6px;border:1px solid var(--line);border-radius:15px;background:var(--panel);margin-bottom:17px;box-shadow:var(--shadow)}.nav button{flex:1;white-space:nowrap;border:0;border-radius:10px;padding:11px 13px;background:transparent;color:var(--muted);font-size:13px;font-weight:750}.nav button.active{background:var(--accent-soft);color:var(--accent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 30%,transparent)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:19px;margin-bottom:16px}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.panel-title{margin:0;font-size:15px;font-weight:800;letter-spacing:.025em}.panel-meta{font-size:11px;color:var(--muted)}
+.setup-panel{padding:13px 16px}.setup-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.setup-label{font-size:11px;color:var(--muted);font-weight:800}.count-buttons{display:flex;gap:5px}.count-btn{border:1px solid var(--line);border-radius:8px;background:var(--panel-2);color:var(--muted);padding:6px 10px;font-size:11px;font-weight:800}.count-btn.active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}.setup-divider{width:1px;height:24px;background:var(--line);margin:0 3px}.roundbar{display:flex;align-items:center;gap:6px;overflow-x:auto;max-width:100%;padding:2px 0;scrollbar-width:thin}.round-chip{white-space:nowrap;border:1px solid var(--line);background:var(--panel-2);color:var(--muted);padding:7px 12px;border-radius:999px;font-size:11px;font-weight:800}.round-chip.active{background:var(--accent-strong);border-color:var(--accent-strong);color:#fff}.add-round{white-space:nowrap;border:1px dashed color-mix(in srgb,var(--accent) 60%,var(--line));background:transparent;color:var(--accent);padding:6px 11px;border-radius:999px;font-size:11px;font-weight:800}
+.section{display:none;animation:fade .18s ease}.section.active{display:block}@keyframes fade{from{opacity:.55;transform:translateY(3px)}to{opacity:1;transform:none}}
+.seat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.seat-card{min-width:0;border:1px solid var(--line);border-radius:15px;padding:13px;background:linear-gradient(155deg,var(--panel-2),var(--panel));transition:border-color .16s,transform .16s}.seat-card:hover{border-color:color-mix(in srgb,var(--accent) 50%,var(--line));transform:translateY(-1px)}.seat-card.dead{opacity:.62}.seat-head{display:flex;align-items:center;justify-content:space-between;gap:9px;margin-bottom:9px}.role-trigger{max-width:72%;min-width:90px;border:1px solid color-mix(in srgb,var(--accent) 38%,var(--line));background:var(--accent-soft);color:var(--accent);border-radius:9px;padding:6px 9px;text-align:left;font-size:12px;font-weight:850;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.role-trigger.unset{color:var(--muted);border-style:dashed;background:transparent}.seat-id{font-size:13px;font-weight:850;letter-spacing:.03em;white-space:nowrap}.sheriff-mark{color:var(--gold);font-size:16px;margin-left:2px}.alive-mark{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-left:5px;vertical-align:middle}.dead .alive-mark{background:var(--red)}.seat-name{font-size:11px;color:var(--muted);margin:0 0 9px}.seat-notes{display:grid;gap:7px}.saved-note{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:9px}.saved-note p{font-size:12px;line-height:1.65;margin:0 0 7px;white-space:pre-wrap;overflow-wrap:anywhere}.saved-note-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--muted);font-size:10px}.no-note{font-size:11px;color:var(--muted);padding:9px 2px}.seat-vote-trail{border-top:1px solid var(--line);padding-top:8px;margin-top:9px;color:var(--muted);font-size:10px;line-height:1.7}.seat-vote-trail strong{color:var(--accent);font-weight:800}.seat-card-actions{display:flex;gap:7px;margin-top:10px}.seat-card-actions .btn{flex:1}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}.field label{font-size:11px;color:var(--muted);font-weight:800}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:10px;background:var(--input);color:var(--text);padding:9px 11px;font-size:12px}.field textarea{min-height:110px;resize:vertical;line-height:1.7}.field input:focus,.field select:focus,.field textarea:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}.field select option{background:var(--panel);color:var(--text)}.form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.empty{padding:25px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:13px;font-size:12px}
+.phrase-groups{display:grid;gap:11px;margin-top:13px}.phrase-group-title{font-size:10px;color:var(--muted);font-weight:850;margin-bottom:6px;letter-spacing:.06em}.phrase-wrap{display:flex;flex-wrap:wrap;gap:5px}.phrase{border:1px solid var(--line);background:var(--panel-2);color:var(--accent);padding:6px 8px;border-radius:8px;font-size:10px;font-weight:750}.phrase:hover{border-color:var(--accent);background:var(--accent-soft)}.modal-backdrop{display:none;position:fixed;inset:0;z-index:30;align-items:center;justify-content:center;padding:18px;background:rgba(6,4,11,.72);backdrop-filter:blur(7px)}.modal-backdrop.open{display:flex}.modal{width:min(760px,100%);max-height:min(90vh,900px);overflow:auto;border:1px solid var(--line);border-radius:19px;background:var(--panel);box-shadow:0 25px 90px rgba(0,0,0,.42);padding:20px}.modal.narrow{width:min(460px,100%)}.modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:15px}.modal-head h3{margin:0;font-size:16px}.modal-head p{margin:4px 0 0;color:var(--muted);font-size:11px}.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}.modal-note-list{display:grid;gap:7px;margin-top:16px;padding-top:13px;border-top:1px solid var(--line)}.modal-note{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--panel-2)}.modal-note-copy{min-width:0}.modal-note-copy small{display:block;color:var(--muted);font-size:10px;margin-bottom:4px}.modal-note-copy p{margin:0;font-size:11px;white-space:pre-wrap;overflow-wrap:anywhere}.check-row{display:flex;align-items:center;gap:8px;color:var(--text);font-size:12px;font-weight:750}.check-row input{accent-color:var(--accent);width:16px;height:16px}.hidden{display:none!important}
+.vote-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:13px}.vote-stat{padding:10px;border:1px solid var(--line);border-radius:11px;background:var(--panel-2);text-align:center}.vote-stat strong{display:block;font-size:19px;color:var(--accent)}.vote-stat span{color:var(--muted);font-size:10px}.vote-target-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.vote-target{min-width:0;border:1px solid var(--line);border-radius:13px;padding:11px;background:var(--panel-2)}.vote-target-head{display:flex;align-items:center;justify-content:space-between;gap:7px;margin-bottom:9px}.vote-target-head strong{font-size:12px}.vote-count{font-size:11px;font-weight:900;color:var(--accent);background:var(--accent-soft);padding:4px 8px;border-radius:999px;white-space:nowrap}.voter-chips{display:flex;flex-wrap:wrap;gap:5px}.voter-chip{min-width:30px;border:1px solid var(--line);border-radius:7px;padding:5px 6px;background:var(--panel);color:var(--muted);font-size:10px;font-weight:800}.voter-chip.active{background:var(--accent-strong);color:#fff;border-color:var(--accent-strong)}.voter-chip.moved{border-style:dashed;color:var(--gold)}.target-subtext{font-size:10px;color:var(--muted);margin-top:8px;min-height:16px}.voter-summary{display:grid;gap:5px}.voter-row{display:grid;grid-template-columns:52px minmax(0,1fr) auto auto;align-items:center;gap:8px;padding:7px 9px;border:1px solid var(--line);border-radius:9px;background:var(--panel-2)}.voter-row strong{font-size:11px}.voter-dest{font-size:11px;color:var(--muted)}.voter-dest b{color:var(--accent)}.vote-history{display:grid;gap:6px}.history-row{display:grid;grid-template-columns:55px minmax(0,1fr);gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--panel-2)}.history-row strong{font-size:11px}.history-values{display:flex;flex-wrap:wrap;gap:5px}.history-pill{font-size:10px;color:var(--muted);background:var(--panel-3);border-radius:6px;padding:3px 6px}.history-pill b{color:var(--accent)}
+.relation-layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(300px,.8fr);gap:16px}.relation-map-wrap{border:1px solid var(--line);border-radius:13px;background:var(--panel-2);overflow:hidden}.relation-map{width:100%;height:auto;display:block;min-height:350px}.relation-map .edge-label{font-size:12px;font-weight:850;text-anchor:middle;dominant-baseline:middle}.relation-map .node-number{font-size:13px;font-weight:900;text-anchor:middle;dominant-baseline:middle;fill:var(--text)}.relation-form{display:grid;gap:10px;padding:13px;border:1px solid var(--line);border-radius:13px;background:var(--panel-2)}.relation-list{display:grid;gap:7px;margin-top:12px}.relation-item{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid var(--line);border-radius:10px;padding:9px;background:var(--panel-2)}.relation-item strong{font-size:11px}.relation-item small{display:block;color:var(--muted);font-size:10px;margin-top:2px}.relation-tag{display:inline-block;margin-top:4px;padding:3px 7px;border-radius:6px;background:var(--accent-soft);color:var(--accent);font-size:10px;font-weight:850}.relation-legend{display:flex;flex-wrap:wrap;gap:10px;color:var(--muted);font-size:10px;margin-top:9px}.legend-line{display:inline-block;width:20px;border-top:2px solid var(--muted);vertical-align:middle;margin-right:5px}.legend-line.dashed{border-top-style:dashed}
+.timeline-form{display:grid;gap:11px}.timeline{display:grid;gap:8px}.timeline-item{display:grid;grid-template-columns:80px minmax(0,1fr) auto;gap:10px;align-items:start;border:1px solid var(--line);border-radius:12px;padding:11px;background:var(--panel-2)}.timeline-round{font-size:10px;color:var(--accent);font-weight:850;background:var(--accent-soft);border-radius:7px;padding:5px 7px;text-align:center}.timeline-content strong{font-size:12px}.timeline-content p{font-size:11px;color:var(--muted);margin:4px 0 0;white-space:pre-wrap}.timeline-time{font-size:10px;color:var(--muted);text-align:right;margin-bottom:6px}.timeline-actions{display:flex;gap:5px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,15px);opacity:0;pointer-events:none;z-index:60;background:var(--text);color:var(--bg);padding:10px 15px;border-radius:10px;font-size:12px;font-weight:750;box-shadow:var(--shadow);transition:.2s}.toast.show{transform:translate(-50%,0);opacity:1}.footer{color:var(--muted);font-size:10px;text-align:center;margin-top:24px}
+@media(max-width:1050px){.seat-grid,.vote-target-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.relation-layout{grid-template-columns:1fr}}
+@media(max-width:760px){.app-shell{padding:16px 12px 38px}.topbar{align-items:flex-start;flex-direction:column}.top-actions{justify-content:flex-start;width:100%}.theme-switcher{max-width:100%;overflow:auto}.theme-btn{padding:6px}.theme-btn .theme-name{display:none}.nav{overflow:auto}.nav button{flex:none;min-width:0;padding:10px 12px}.setup-panel{padding:12px}.setup-divider{display:none}.setup-row{gap:7px}.roundbar{width:100%;margin-top:5px}.panel{padding:14px}.seat-grid,.vote-target-grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr 1fr}.modal{padding:15px}.modal-grid{grid-template-columns:1fr}.timeline-item{grid-template-columns:62px minmax(0,1fr)}.timeline-item>div:last-child{grid-column:2;display:flex;align-items:center;justify-content:flex-start;gap:6px}.timeline-time{margin:0}.voter-row{grid-template-columns:42px minmax(0,1fr) auto auto}}
+@media(min-width:761px) and (max-width:1120px){.topbar{align-items:flex-start;flex-direction:column}.top-actions{justify-content:flex-start}}
+</style>
+</head>
+<body data-theme="dark">
+<div class="app-shell">
+  <header class="topbar">
+    <div class="brand"><div class="brand-mark">✦</div><h1>殺盤推演 <span>WE’RE WOLVES</span></h1></div>
+    <div class="top-actions">
+      <div class="theme-switcher" aria-label="切換配色">
+        <button class="theme-btn active" data-action="setTheme" data-theme="dark" title="深紫"><i class="swatch" style="--swatch:#9f83c6"></i><span class="theme-name">深紫</span></button>
+        <button class="theme-btn" data-action="setTheme" data-theme="light" title="淺色"><i class="swatch" style="--swatch:#d9c7ed"></i><span class="theme-name">淺色</span></button>
+        <button class="theme-btn" data-action="setTheme" data-theme="blue" title="海藍"><i class="swatch" style="--swatch:#6fa8cc"></i><span class="theme-name">海藍</span></button>
+        <button class="theme-btn" data-action="setTheme" data-theme="forest" title="森林"><i class="swatch" style="--swatch:#80ad89"></i><span class="theme-name">森林</span></button>
+        <button class="theme-btn" data-action="setTheme" data-theme="rose" title="玫瑰"><i class="swatch" style="--swatch:#c88da9"></i><span class="theme-name">玫瑰</span></button>
+      </div>
+      <button class="btn" data-action="summary">對局整理</button>
+      <button class="btn" data-action="export">匯出備份</button>
+      <button class="btn" data-action="import">匯入</button>
+      <input type="file" id="importFile" accept="application/json,.json" class="hidden">
+      <button class="btn danger" data-action="reset">重設</button>
+    </div>
+  </header>
+
+  <nav class="nav" aria-label="主要功能">
+    <button class="active" data-tab="speech">1、發言筆記</button>
+    <button data-tab="votes">2、投票紀錄</button>
+    <button data-tab="timeline">3、事件時間</button>
+    <button data-tab="relations">4、玩家關係</button>
+  </nav>
+
+  <section class="panel setup-panel">
+    <div class="setup-row">
+      <span class="setup-label">玩家人數</span><div class="count-buttons" id="countButtons"></div>
+      <span class="setup-divider"></span>
+      <span class="setup-label">回合</span><div class="roundbar" id="roundBar"></div>
+    </div>
+  </section>
+
+  <main>
+    <section class="section active" id="tab-speech">
+      <div class="panel-head"><h2 class="panel-title">發言筆記</h2><span class="panel-meta" id="speechMeta"></span></div>
+      <div class="seat-grid" id="speechSeatGrid"></div>
+    </section>
+
+    <section class="section" id="tab-votes">
+      <div class="panel">
+        <div class="panel-head"><h2 class="panel-title">投票紀錄</h2><span class="panel-meta" id="voteRoundLabel"></span></div>
+        <div class="vote-stats" id="voteStats"></div>
+        <div class="vote-target-grid" id="voteTargetGrid"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3 class="panel-title">每位玩家的投票去向</h3><span class="panel-meta">棄票與清除可直接修改</span></div>
+        <div class="voter-summary" id="voterSummary"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3 class="panel-title">逐輪投票軌跡</h3></div>
+        <div class="vote-history" id="voteHistory"></div>
+      </div>
+    </section>
+
+    <section class="section" id="tab-timeline">
+      <div class="panel">
+        <div class="panel-head"><h2 class="panel-title" id="eventFormTitle">新增事件</h2><span class="panel-meta" id="eventFormRound"></span></div>
+        <div class="timeline-form">
+          <div class="form-grid">
+            <div class="field"><label for="eventRound">回合</label><select id="eventRound"></select></div>
+            <div class="field"><label for="eventType">事件類型</label><select id="eventType"><option>夜間死亡</option><option>白天放逐</option><option>女巫毒殺</option><option>獵人帶走</option><option>自爆</option><option>救活</option><option>其他</option></select></div>
+            <div class="field"><label for="eventPlayer">相關玩家</label><select id="eventPlayer"></select></div>
+          </div>
+          <div class="field"><label for="eventNote">補充說明</label><input id="eventNote" placeholder="可填寫死因推測、技能發動或其他線索"></div>
+          <div style="display:flex;gap:7px;justify-content:flex-end"><button class="btn hidden" id="cancelEventEdit" data-action="cancelEventEdit">取消修改</button><button class="btn primary" id="saveEventBtn" data-action="saveEvent">＋ 新增事件</button></div>
+        </div>
+      </div>
+      <div class="panel"><div class="panel-head"><h3 class="panel-title">事件紀錄</h3><span class="panel-meta" id="eventCount"></span></div><div class="timeline" id="timelineList"></div></div>
+    </section>
+
+    <section class="section" id="tab-relations">
+      <div class="panel">
+        <div class="panel-head"><h2 class="panel-title">玩家關係</h2><span class="panel-meta" id="relationCount"></span></div>
+        <div class="relation-layout">
+          <div>
+            <div class="relation-map-wrap"><svg class="relation-map" id="relationMap" viewBox="0 0 900 560" role="img" aria-label="玩家關係圖"></svg></div>
+            <div class="relation-legend"><span><i class="legend-line dashed"></i>單向關係（虛線箭頭）</span><span><i class="legend-line"></i>雙向關係（實線）</span></div>
+          </div>
+          <div>
+            <div class="relation-form">
+              <div class="form-grid">
+                <div class="field"><label for="relationFrom">起點玩家</label><select id="relationFrom"></select></div>
+                <div class="field"><label for="relationType">關係</label><select id="relationType"><option>保</option><option>踩</option><option>對立</option><option>互認</option><option>疑似狼隊</option><option>拉票</option><option>跟票</option><option>捆綁</option></select></div>
+                <div class="field"><label for="relationTo">指向玩家</label><select id="relationTo"></select></div>
+              </div>
+              <label class="check-row"><input id="relationDirected" type="checkbox" checked> 單向關係（虛線箭頭）</label>
+              <div class="field"><label for="relationNote">補充說明（選填）</label><input id="relationNote" placeholder="例如：發言互相呼應"></div>
+              <button class="btn primary" data-action="addRelation">＋ 建立關係</button>
+            </div>
+            <div class="relation-list" id="relationList"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <div class="footer">本機儲存 · 可匯出 JSON 備份與對局整理</div>
+</div>
+
+<div class="modal-backdrop" id="speechModal" role="dialog" aria-modal="true" aria-labelledby="speechModalTitle"><div class="modal" id="speechModalContent"></div></div>
+<div class="modal-backdrop" id="roleModal" role="dialog" aria-modal="true" aria-labelledby="roleModalTitle"><div class="modal narrow" id="roleModalContent"></div></div>
+<div class="modal-backdrop" id="summaryModal" role="dialog" aria-modal="true" aria-labelledby="summaryModalTitle"><div class="modal" id="summaryModalContent"></div></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+'use strict';
+const STORAGE_KEY='nighttalk_werewolf_notes_v2';
+const ROLES=['未設定','預言家','女巫','守衛','獵人','平民','神職','狼人','狼王','白狼王','白痴','丘比特','騎士','其他'];
+const PHRASES=[
+  {title:'身份與配置',items:['預言家','女巫','守衛','獵人','平民','神職','狼人','狼王','白狼王','白痴','好人','狼隊','悍跳','跳神職']},
+  {title:'預言家查驗',items:['金水','銀水','查殺','雙金水','對跳','退水','警徽流','查驗','驗人','自證身份','警上發言','警下投票']},
+  {title:'立場與判斷',items:['保','踩','認好','認狼','鐵好','鐵狼','偏好','偏狼','暫放','待定','存疑','站邊','反水','倒鉤','衝鋒','做身份']},
+  {title:'投票與行為',items:['歸票','拉票','跟票','衝票','分票','棄票','掛票','投給','改票','平票','PK發言','上警','警下','自爆']},
+  {title:'局勢與推理',items:['外置位','焦點位','狼坑','四狼位置','身份不做好','邏輯不通','視角矛盾','收益不符','互踩','互保','搏殺','刀口','遺言','聽感偏好']},
+  {title:'數字與符號',items:['0','1','2','3','4','5','6','7','8','9','→','？','✓','✗']}
+];
+const REL_COLORS={'保':'#70b99a','踩':'#d78391','對立':'#d78391','互認':'#83a6d0','疑似狼隊':'#b79add','拉票':'#d6b875','跟票':'#9ba6b7','捆綁':'#9e9ab5'};
+const DEATH_TYPES=['夜間死亡','白天放逐','女巫毒殺','獵人帶走','自爆'];
+const THEMES=['dark','light','blue','forest','rose'];
+let state=loadState();
+let modalPlayerId=null,editingNoteId=null,editingNoteRound=null,rolePlayerId=null,editingEventId=null,toastTimer=null;
+
+function newPlayer(id){return {id,name:`${id}號`,role:'未設定',sheriff:false,alive:true,speeches:{}};}
+function freshState(count=12){return {version:3,playerCount:count,currentRound:'警上',rounds:['警上','第一天','第二天','第三天'],players:Array.from({length:count},(_,i)=>newPlayer(i+1)),votes:{},relations:[],events:[],theme:'dark'};}
+function normalizeImported(parsed){
+  const count=Math.max(9,Math.min(12,Number(parsed.playerCount)||parsed.players?.length||12));const fresh=freshState(count);
+  fresh.rounds=Array.isArray(parsed.rounds)&&parsed.rounds.length?parsed.rounds:fresh.rounds;fresh.currentRound=fresh.rounds.includes(parsed.currentRound)?parsed.currentRound:fresh.rounds[0];
+  fresh.players=Array.from({length:count},(_,i)=>{const old=Array.isArray(parsed.players)?parsed.players.find(p=>Number(p.id)===i+1):null;return old?{...newPlayer(i+1),...old,id:i+1,sheriff:!!old.sheriff,speeches:old.speeches&&typeof old.speeches==='object'?old.speeches:{}}:newPlayer(i+1);});
+  fresh.votes=parsed.votes&&typeof parsed.votes==='object'?parsed.votes:{};
+  fresh.relations=Array.isArray(parsed.relations)?parsed.relations.filter(r=>Number(r.from)<=count&&Number(r.to)<=count&&Number(r.from)!==Number(r.to)).map(r=>({...r,from:Number(r.from),to:Number(r.to),directed:r.directed!==false})):[];
+  fresh.events=Array.isArray(parsed.events)?parsed.events.filter(e=>!e.playerId||Number(e.playerId)<=count).map(e=>({...e,playerId:e.playerId?Number(e.playerId):null})):[];
+  fresh.theme=THEMES.includes(parsed.theme)?parsed.theme:'dark';
+  fresh.votes=Object.fromEntries(Object.entries(fresh.votes).map(([round,roundVotes])=>[round,Object.fromEntries(Object.entries(roundVotes||{}).filter(([voter,target])=>Number(voter)<=count&&(target==='abstain'||(Number(target)>=1&&Number(target)<=count))).map(([voter,target])=>[String(Number(voter)),target==='abstain'?'abstain':String(Number(target))]))]));
+  recomputeAlive(fresh);return fresh;
+}
+function loadState(){try{const raw=localStorage.getItem(STORAGE_KEY);if(!raw)return freshState();const parsed=JSON.parse(raw);if(!parsed||typeof parsed!=='object')return freshState();return normalizeImported(parsed);}catch(err){console.warn('無法讀取本機紀錄',err);return freshState();}}
+function saveState(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(err){console.error(err);showToast('本機儲存失敗，請匯出 JSON 備份');}}
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function player(id){return state.players.find(p=>p.id===Number(id));}
+function roundNotes(p,round=state.currentRound){return Array.isArray(p.speeches?.[round])?p.speeches[round]:[];}
+function allNoteCount(){return state.players.reduce((sum,p)=>sum+Object.values(p.speeches||{}).reduce((n,a)=>n+(Array.isArray(a)?a.length:0),0),0);}
+function recomputeAlive(target=state){target.players.forEach(p=>p.alive=true);(target.events||[]).forEach(ev=>{const p=target.players.find(x=>x.id===Number(ev.playerId));if(!p)return;if(DEATH_TYPES.includes(ev.type))p.alive=false;else if(ev.type==='救活')p.alive=true;});}
+function showToast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2200);}
+function currentVotes(){return state.votes[state.currentRound]||(state.votes[state.currentRound]={});}
+function voteTargetLabel(target){if(target==='abstain')return '棄票';if(target===undefined||target===null||target==='')return '未記錄';return `${target}號`;}
+function voteTrail(p){const parts=state.rounds.map(r=>{const target=state.votes[r]?.[p.id];return target!==undefined?`${r} ${voteTargetLabel(target)}`:'';}).filter(Boolean);return parts.length?parts.join('　·　'):'尚無投票紀錄';}
+function setTab(tab){document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id===`tab-${tab}`));}
+function setTheme(theme){if(!THEMES.includes(theme))return;state.theme=theme;document.body.dataset.theme=theme;document.querySelectorAll('.theme-btn').forEach(b=>b.classList.toggle('active',b.dataset.theme===theme));saveState();}
+
+function render(){renderSetup();renderSpeech();renderVotes();renderRelationControls();renderRelations();renderEventForm();renderTimeline();setTheme(state.theme||'dark');}
+function renderSetup(){
+  document.getElementById('countButtons').innerHTML=[9,10,11,12].map(n=>`<button class="count-btn ${state.playerCount===n?'active':''}" data-action="setCount" data-count="${n}" aria-pressed="${state.playerCount===n}">${n} 人</button>`).join('');
+  document.getElementById('roundBar').innerHTML=state.rounds.map(r=>`<button class="round-chip ${r===state.currentRound?'active':''}" data-action="setRound" data-round="${esc(r)}">${esc(r)}</button>`).join('')+`<button class="add-round" data-action="addRound">＋ 回合</button>`;
+}
+function renderSpeech(){
+  document.getElementById('speechMeta').textContent=`${state.currentRound} · ${state.playerCount} 人`;
+  document.getElementById('speechSeatGrid').innerHTML=state.players.map(p=>{
+    const notes=roundNotes(p);
+    const noteHtml=notes.length?notes.map(n=>`<div class="saved-note"><p>${esc(n.text)}</p><div class="saved-note-foot"><span>${new Date(n.createdAt||Date.now()).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'})}</span><button class="btn small" data-action="editSpeech" data-player="${p.id}" data-note="${esc(n.id)}" data-round="${esc(state.currentRound)}">修改</button></div></div>`).join(''):`<div class="no-note">本回合尚無發言紀錄</div>`;
+    const role=p.role&&p.role!=='未設定'?p.role:'設定身分';
+    return `<article class="seat-card ${p.alive?'':'dead'}"><div class="seat-head"><button class="role-trigger ${p.role==='未設定'?'unset':''}" data-action="editRole" data-player="${p.id}" title="編輯身分與警徽">${esc(role)}</button><div class="seat-id">${p.id}號${p.sheriff?'<span class="sheriff-mark" title="警徽">＋</span>':''}<i class="alive-mark" title="${p.alive?'存活':'已出局'}"></i></div></div><div class="seat-name">${esc(p.name)}${p.alive?'':' · 已出局'}</div><div class="seat-notes">${noteHtml}</div><div class="seat-vote-trail"><strong>投票：</strong>${esc(voteTrail(p))}</div><div class="seat-card-actions"><button class="btn primary" data-action="openSpeech" data-player="${p.id}">＋ 記錄發言</button></div></article>`;
+  }).join('');
+}
+function renderVotes(){
+  const votes=currentVotes();let valid=0,abstain=0,unrecorded=0;state.players.forEach(p=>{const v=votes[p.id];if(v===undefined)unrecorded++;else if(v==='abstain')abstain++;else valid++;});
+  document.getElementById('voteRoundLabel').textContent=state.currentRound;
+  document.getElementById('voteStats').innerHTML=[['有效票',valid],['棄票',abstain],['未記錄',unrecorded]].map(([k,v])=>`<div class="vote-stat"><strong>${v}</strong><span>${k}</span></div>`).join('');
+  document.getElementById('voteTargetGrid').innerHTML=state.players.map(target=>{
+    const voters=state.players.filter(voter=>String(votes[voter.id])===String(target.id));
+    const chips=state.players.map(voter=>{const assigned=votes[voter.id];const active=String(assigned)===String(target.id);const moved=assigned!==undefined&&assigned!=='abstain'&&!active;const label=moved?`${voter.id}→${assigned}`:String(voter.id);return `<button class="voter-chip ${active?'active':''} ${moved?'moved':''}" data-action="toggleVote" data-voter="${voter.id}" data-target="${target.id}" aria-pressed="${active}" title="${moved?`${voter.id}號目前投給${assigned}號，點擊可改投${target.id}號`:`${voter.id}號投給${target.id}號`}">${label}</button>`;}).join('');
+    const names=voters.length?voters.map(p=>p.id).join('、'):'尚無人';
+    return `<div class="vote-target"><div class="vote-target-head"><strong>${target.id}號玩家被投票</strong><span class="vote-count">${voters.length} 票</span></div><div class="voter-chips">${chips}</div><div class="target-subtext">被 ${names} 投票</div></div>`;
+  }).join('');
+  document.getElementById('voterSummary').innerHTML=state.players.map(p=>{const dest=votes[p.id];return `<div class="voter-row"><strong>${p.id}號</strong><span class="voter-dest">→ <b>${esc(voteTargetLabel(dest))}</b></span><button class="btn small" data-action="abstainVote" data-voter="${p.id}">棄票</button><button class="btn small danger" data-action="clearVote" data-voter="${p.id}">清除</button></div>`;}).join('');
+  document.getElementById('voteHistory').innerHTML=state.players.map(p=>`<div class="history-row"><strong>${p.id}號</strong><div class="history-values">${state.rounds.map(r=>{const val=state.votes[r]?.[p.id];return `<span class="history-pill">${esc(r)} <b>${esc(voteTargetLabel(val))}</b></span>`;}).join('')}</div></div>`).join('');
+}
+function renderRelationControls(){
+  const opts=state.players.map(p=>`<option value="${p.id}">${p.id}號</option>`).join('');
+  ['relationFrom','relationTo'].forEach(id=>{const el=document.getElementById(id),old=el.value;el.innerHTML=opts;el.value=[...el.options].some(o=>o.value===old)?old:(id==='relationTo'&&state.playerCount>1?'2':'1');});
+}
+function renderRelations(){
+  document.getElementById('relationCount').textContent=`${state.relations.length} 條`;
+  document.getElementById('relationList').innerHTML=state.relations.length?state.relations.map(r=>`<div class="relation-item"><div><strong>${r.from}號 ${r.directed?'→':'↔'} ${esc(r.type)} ${r.directed?'→':'↔'} ${r.to}號</strong>${r.note?`<small>${esc(r.note)}</small>`:''}</div><button class="btn small danger" data-action="deleteRelation" data-id="${esc(r.id)}">刪除</button></div>`).join(''):`<div class="empty">尚未建立玩家關係</div>`;
+  const svg=document.getElementById('relationMap'),cx=450,cy=275,rx=335,ry=205,radius=27,coords={};
+  state.players.forEach((p,i)=>{const a=-Math.PI/2+Math.PI*2*i/state.playerCount;coords[p.id]={x:cx+rx*Math.cos(a),y:cy+ry*Math.sin(a)};});
+  let markup=`<defs><marker id="relationArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="context-stroke"/></marker></defs>`;
+  state.relations.forEach(r=>{const a=coords[r.from],b=coords[r.to];if(!a||!b)return;const dx=b.x-a.x,dy=b.y-a.y,d=Math.max(1,Math.hypot(dx,dy)),ux=dx/d,uy=dy/d;const x1=a.x+ux*(radius+3),y1=a.y+uy*(radius+3),x2=b.x-ux*(radius+10),y2=b.y-uy*(radius+10),mx=(x1+x2)/2,my=(y1+y2)/2,color=REL_COLORS[r.type]||'#a99ab9';markup+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="${r.directed?2.5:3}" ${r.directed?'stroke-dasharray="7 6" marker-end="url(#relationArrow)"':''} opacity=".88"/><rect x="${mx-32}" y="${my-12}" width="64" height="24" rx="8" fill="var(--panel)" stroke="${color}" stroke-width="1.2"/><text x="${mx}" y="${my+1}" class="edge-label" fill="${color}">${esc(r.type)}</text>`;});
+  state.players.forEach(p=>{const c=coords[p.id];markup+=`<g><circle cx="${c.x}" cy="${c.y}" r="${radius}" fill="var(--panel-3)" stroke="${p.alive?'var(--accent)':'var(--muted)'}" stroke-width="2"/><text x="${c.x}" y="${c.y+1}" class="node-number">${p.id}</text></g>`;});svg.innerHTML=markup;
+}
+function renderEventForm(){
+  const round=document.getElementById('eventRound'),oldRound=round.value;round.innerHTML=state.rounds.map(r=>`<option value="${esc(r)}">${esc(r)}</option>`).join('');round.value=state.rounds.includes(oldRound)?oldRound:state.currentRound;
+  const playerSelect=document.getElementById('eventPlayer'),oldPlayer=playerSelect.value;playerSelect.innerHTML='<option value="">未指定</option>'+state.players.map(p=>`<option value="${p.id}">${p.id}號</option>`).join('');playerSelect.value=[...playerSelect.options].some(o=>o.value===oldPlayer)?oldPlayer:'';
+}
+function renderTimeline(){
+  const events=state.events.slice().reverse();document.getElementById('eventCount').textContent=`${events.length} 筆`;
+  document.getElementById('timelineList').innerHTML=events.length?events.map(ev=>`<div class="timeline-item"><div class="timeline-round">${esc(ev.round||'未標記')}</div><div class="timeline-content"><strong>${esc(ev.type)}${ev.playerId?` · ${ev.playerId}號`:''}</strong>${ev.note?`<p>${esc(ev.note)}</p>`:''}</div><div><div class="timeline-time">${new Date(ev.createdAt||Date.now()).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'})}</div><div class="timeline-actions"><button class="btn small" data-action="editEvent" data-id="${esc(ev.id)}">修改</button><button class="btn small danger" data-action="deleteEvent" data-id="${esc(ev.id)}">刪除</button></div></div></div>`).join(''):`<div class="empty">尚無事件紀錄</div>`;
+}
+
+function openSpeech(id,noteId=null,noteRound=null){
+  const p=player(id);if(!p)return;modalPlayerId=p.id;editingNoteId=noteId;editingNoteRound=noteRound;
+  renderSpeechModal();document.getElementById('speechModal').classList.add('open');
+}
+function renderSpeechModal(){
+  const p=player(modalPlayerId);if(!p)return;const editing=editingNoteId!==null;let existing=null;
+  if(editing){existing=roundNotes(p,editingNoteRound).find(n=>String(n.id)===String(editingNoteId));if(!existing){editingNoteId=null;editingNoteRound=null;}}
+  const targetRound=editingNoteRound||state.currentRound;
+  const phrases=PHRASES.map(g=>`<div><div class="phrase-group-title">${esc(g.title)}</div><div class="phrase-wrap">${g.items.map(word=>`<button class="phrase" data-action="insertPhrase" data-phrase="${esc(word)}">${esc(word)}</button>`).join('')}</div></div>`).join('');
+  const history=state.rounds.flatMap(r=>roundNotes(p,r).map(n=>({r,n}))).sort((a,b)=>(b.n.createdAt||0)-(a.n.createdAt||0));
+  document.getElementById('speechModalContent').innerHTML=`<div class="modal-head"><div><h3 id="speechModalTitle">${p.id}號發言筆記</h3><p>${editing?'修改已儲存的筆記':'新增一則發言筆記'}</p></div><button class="btn icon" data-action="closeSpeech" aria-label="關閉">×</button></div>
+    <div class="modal-grid"><div class="field"><label for="speechRound">紀錄回合</label><select id="speechRound">${state.rounds.map(r=>`<option value="${esc(r)}" ${r===targetRound?'selected':''}>${esc(r)}</option>`).join('')}</select></div><div class="field"><label>玩家座位</label><input value="${p.id}號" disabled></div></div>
+    <div class="field" style="margin-top:12px"><label for="speechDraft">發言重點</label><textarea id="speechDraft" placeholder="例如：自稱預言家，昨晚查驗 7 號為金水；警徽流先 3 後 9……">${esc(existing?.text||'')}</textarea></div>
+    <div class="phrase-groups" style="margin-top:14px"><div class="phrase-group-title">快速詞語｜點選即可插入</div>${phrases}</div>
+    <div class="modal-actions"><button class="btn" data-action="closeSpeech">取消</button><button class="btn primary" data-action="saveSpeech">${editing?'儲存修改':'儲存筆記'}</button></div>
+    <div class="modal-note-list"><div class="phrase-group-title">此玩家已儲存的筆記</div>${history.length?history.map(({r,n})=>`<div class="modal-note"><div class="modal-note-copy"><small>${esc(r)}</small><p>${esc(n.text)}</p></div><button class="btn small" data-action="editSpeech" data-player="${p.id}" data-note="${esc(n.id)}" data-round="${esc(r)}">修改</button></div>`).join(''):'<span class="panel-meta">尚無其他紀錄</span>'}</div>`;
+}
+function closeSpeech(){document.getElementById('speechModal').classList.remove('open');modalPlayerId=null;editingNoteId=null;editingNoteRound=null;}
+function insertPhrase(word){const ta=document.getElementById('speechDraft');if(!ta)return;const start=ta.selectionStart,end=ta.selectionEnd,before=ta.value.slice(0,start),after=ta.value.slice(end),space=before.length&&!/[\s，。；：、]$/.test(before)?'　':'';const insert=space+word+' ';ta.value=before+insert+after;ta.focus();const pos=(before+insert).length;ta.setSelectionRange(pos,pos);}
+function saveSpeech(){
+  const p=player(modalPlayerId),ta=document.getElementById('speechDraft');if(!p||!ta)return;const wasEditing=editingNoteId!==null;const round=document.getElementById('speechRound').value,text=ta.value.trim();if(!text){showToast('請先輸入發言內容');ta.focus();return;}
+  if(editingNoteId!==null){const oldRound=editingNoteRound;const oldNotes=roundNotes(p,oldRound);const index=oldNotes.findIndex(n=>String(n.id)===String(editingNoteId));if(index>=0){const old=oldNotes[index];oldNotes.splice(index,1);if(!p.speeches[oldRound].length)delete p.speeches[oldRound];if(!p.speeches[round])p.speeches[round]=[];p.speeches[round].push({...old,text,updatedAt:Date.now()});}}
+  else{if(!p.speeches[round])p.speeches[round]=[];p.speeches[round].push({id:`n-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,text,createdAt:Date.now()});}
+  state.currentRound=round;saveState();closeSpeech();render();showToast(wasEditing?'筆記已修改':'筆記已儲存');
+}
+function openRoleEditor(id){const p=player(id);if(!p)return;rolePlayerId=id;document.getElementById('roleModalContent').innerHTML=`<div class="modal-head"><div><h3 id="roleModalTitle">${id}號玩家設定</h3><p>身分與警徽放在同一個設定視窗</p></div><button class="btn icon" data-action="closeRole">×</button></div><div class="field"><label for="roleSelect">身份推測</label><select id="roleSelect">${ROLES.map(r=>`<option value="${esc(r)}" ${p.role===r?'selected':''}>${esc(r)}</option>`).join('')}</select></div><label class="check-row" style="margin-top:13px"><input id="sheriffCheck" type="checkbox" ${p.sheriff?'checked':''}> 持有警徽（座位號旁顯示＋）</label><div class="modal-actions"><button class="btn" data-action="closeRole">取消</button><button class="btn primary" data-action="saveRole">儲存</button></div>`;document.getElementById('roleModal').classList.add('open');}
+function closeRole(){document.getElementById('roleModal').classList.remove('open');rolePlayerId=null;}
+function saveRole(){const p=player(rolePlayerId);if(!p)return;p.role=document.getElementById('roleSelect').value;p.sheriff=document.getElementById('sheriffCheck').checked;saveState();closeRole();renderSpeech();showToast('身分與警徽已更新');}
+function toggleVote(voter,target){const votes=currentVotes();const current=votes[voter];if(String(current)===String(target))delete votes[voter];else votes[voter]=String(target);saveState();renderVotes();renderSpeech();}
+function setAbstain(voter){currentVotes()[voter]='abstain';saveState();renderVotes();renderSpeech();}
+function clearVote(voter){delete currentVotes()[voter];saveState();renderVotes();renderSpeech();}
+function addRelation(){const from=Number(document.getElementById('relationFrom').value),to=Number(document.getElementById('relationTo').value),type=document.getElementById('relationType').value,directed=document.getElementById('relationDirected').checked,note=document.getElementById('relationNote').value.trim();if(!from||!to||from===to){showToast('請選擇兩位不同的玩家');return;}state.relations.push({id:`r-${Date.now()}-${Math.random().toString(36).slice(2,6)}`,from,to,type,directed,note});document.getElementById('relationNote').value='';saveState();renderRelations();showToast('玩家關係已建立');}
+function addOrUpdateEvent(){const type=document.getElementById('eventType').value,playerValue=document.getElementById('eventPlayer').value,playerId=playerValue?Number(playerValue):null,round=document.getElementById('eventRound').value,note=document.getElementById('eventNote').value.trim();
+  if(editingEventId){const ev=state.events.find(x=>String(x.id)===String(editingEventId));if(ev){Object.assign(ev,{type,playerId,round,note,updatedAt:Date.now()});showToast('事件已修改');}}
+  else{state.events.push({id:`e-${Date.now()}-${Math.random().toString(36).slice(2,6)}`,type,playerId,round,note,createdAt:Date.now()});showToast('事件已新增');}
+  editingEventId=null;document.getElementById('eventNote').value='';document.getElementById('eventFormTitle').textContent='新增事件';document.getElementById('saveEventBtn').textContent='＋ 新增事件';document.getElementById('cancelEventEdit').classList.add('hidden');recomputeAlive();saveState();renderEventForm();renderTimeline();renderSpeech();
+}
+function startEditEvent(id){const ev=state.events.find(x=>String(x.id)===String(id));if(!ev)return;editingEventId=ev.id;document.getElementById('eventRound').value=ev.round||state.currentRound;document.getElementById('eventType').value=ev.type;document.getElementById('eventPlayer').value=ev.playerId?String(ev.playerId):'';document.getElementById('eventNote').value=ev.note||'';document.getElementById('eventFormTitle').textContent='修改事件';document.getElementById('saveEventBtn').textContent='儲存修改';document.getElementById('cancelEventEdit').classList.remove('hidden');document.getElementById('eventFormTitle').scrollIntoView({behavior:'smooth',block:'center'});}
+function cancelEventEdit(){editingEventId=null;document.getElementById('eventNote').value='';document.getElementById('eventFormTitle').textContent='新增事件';document.getElementById('saveEventBtn').textContent='＋ 新增事件';document.getElementById('cancelEventEdit').classList.add('hidden');renderEventForm();}
+function setCount(count){count=Number(count);if(![9,10,11,12].includes(count))return;if(count<state.playerCount){const hasData=state.players.slice(count).some(p=>Object.values(p.speeches||{}).some(a=>a?.length)||p.role!=='未設定'||p.sheriff)||state.relations.some(r=>r.from>count||r.to>count)||state.events.some(e=>e.playerId>count)||Object.values(state.votes).some(rv=>Object.entries(rv||{}).some(([v,t])=>Number(v)>count||(t!=='abstain'&&Number(t)>count)));if(hasData&&!confirm(`縮減至 ${count} 人會移除多出的座位資料與相關投票、關係、事件。確定繼續？`))return;}
+  state.players=Array.from({length:count},(_,i)=>state.players[i]||newPlayer(i+1));state.playerCount=count;state.relations=state.relations.filter(r=>r.from<=count&&r.to<=count);state.events=state.events.filter(e=>!e.playerId||e.playerId<=count);Object.keys(state.votes).forEach(r=>Object.keys(state.votes[r]||{}).forEach(v=>{const t=state.votes[r][v];if(Number(v)>count||(t!=='abstain'&&Number(t)>count))delete state.votes[r][v];}));saveState();render();showToast(`已切換為 ${count} 人局`);}
+function addRound(){const nums=state.rounds.map(r=>{const m=r.match(/第([一二三四五六七八九十\d]+)天/);if(!m)return 0;const map={'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9,'十':10};return Number(map[m[1]]||m[1])||0;});const n=Math.max(0,...nums)+1,cn=['','一','二','三','四','五','六','七','八','九','十'];const label=n<cn.length?`第${cn[n]}天`:`第${n}天`;if(!state.rounds.includes(label))state.rounds.push(label);state.currentRound=label;saveState();render();showToast(`已新增${label}`);}
+function buildSummary(){
+  const out=[];out.push('殺盤推演｜We’re wolves');out.push(`玩家人數：${state.playerCount} 人`);out.push(`整理時間：${new Date().toLocaleString('zh-TW')}`);out.push('');out.push('【玩家筆記與身分推測】');
+  state.players.forEach(p=>{out.push(`${p.id}號｜${p.name}｜身份推測：${p.role==='未設定'?'未設定':p.role}${p.sheriff?'｜警徽':''}｜${p.alive?'存活':'已出局'}`);state.rounds.forEach(r=>{roundNotes(p,r).forEach((n,i)=>out.push(`  ${r} 筆記${i+1}：${n.text}`));});const trail=state.rounds.map(r=>{const v=state.votes[r]?.[p.id];return v!==undefined?`${r}：${voteTargetLabel(v)}`:null;}).filter(Boolean);if(trail.length)out.push(`  投票軌跡：${trail.join('；')}`);});
+  out.push('','【各回合票型】');state.rounds.forEach(r=>{const rv=state.votes[r]||{};out.push(r);state.players.forEach(target=>{const voters=state.players.filter(v=>String(rv[v.id])===String(target.id)).map(v=>v.id);if(voters.length)out.push(`  ${target.id}號被 ${voters.join('、')} 投票（${voters.length} 票）`);});const abst=state.players.filter(p=>rv[p.id]==='abstain').map(p=>p.id);const missing=state.players.filter(p=>rv[p.id]===undefined).map(p=>p.id);if(abst.length)out.push(`  棄票：${abst.join('、')}號`);if(missing.length)out.push(`  未記錄：${missing.join('、')}號`);});
+  out.push('','【玩家關係】');if(state.relations.length)state.relations.forEach(r=>out.push(`  ${r.from}號 ${r.directed?'→':'↔'} ${r.type} ${r.directed?'→':'↔'} ${r.to}號${r.note?`｜${r.note}`:''}`));else out.push('  尚無關係紀錄');
+  out.push('','【事件時間】');if(state.events.length)state.events.forEach(ev=>out.push(`  ${ev.round}｜${ev.type}${ev.playerId?`｜${ev.playerId}號`:''}${ev.note?`｜${ev.note}`:''}`));else out.push('  尚無事件紀錄');
+  out.push('','※ 本整理為玩家當局觀察與推測，實際身份以遊戲結算為準。');return out.join('\n');
+}
+function openSummary(){const text=buildSummary();document.getElementById('summaryModalContent').innerHTML=`<div class="modal-head"><div><h3 id="summaryModalTitle">對局綜合整理</h3><p>可複製全文分享，或下載成 TXT 檔</p></div><button class="btn icon" data-action="closeSummary">×</button></div><textarea id="summaryText" style="width:100%;min-height:55vh;border:1px solid var(--line);border-radius:11px;background:var(--input);color:var(--text);padding:12px;font-size:11px;line-height:1.65">${esc(text)}</textarea><div class="modal-actions"><button class="btn" data-action="downloadSummary">下載 TXT</button><button class="btn primary" data-action="copySummary">複製整理內容</button></div>`;document.getElementById('summaryModal').classList.add('open');}
+async function copySummary(){const ta=document.getElementById('summaryText');try{await navigator.clipboard.writeText(ta.value);showToast('整理內容已複製');}catch(e){ta.focus();ta.select();try{document.execCommand('copy');showToast('整理內容已複製');}catch(err){showToast('請手動選取並複製');}}}
+function downloadSummary(){const text=document.getElementById('summaryText').value;const blob=new Blob([text],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`殺盤推演_對局整理_${new Date().toISOString().slice(0,10)}.txt`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);showToast('對局整理已下載');}
+function exportJSON(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`殺盤推演備份_${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);showToast('JSON 備份已匯出');}
+function importJSON(file){if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const parsed=JSON.parse(reader.result);if(!parsed||!Array.isArray(parsed.players))throw new Error('bad file');state=normalizeImported(parsed);saveState();render();showToast('備份匯入成功');}catch(e){showToast('匯入失敗：檔案格式不正確');}};reader.readAsText(file);}
+function resetGame(){if(!confirm('確定重設本局？所有筆記、投票、事件與關係都會清除。建議先匯出備份。'))return;const theme=state.theme;state=freshState(12);state.theme=theme;editingEventId=null;cancelEventEdit();saveState();render();setTab('speech');showToast('已建立新的 12 人對局');}
+
+// Delegated actions keep dynamically-rendered controls interactive.
+document.addEventListener('click',e=>{
+  const tab=e.target.closest('[data-tab]');if(tab){setTab(tab.dataset.tab);return;}
+  const btn=e.target.closest('[data-action]');if(!btn)return;const a=btn.dataset.action;
+  if(a==='setTheme')setTheme(btn.dataset.theme);
+  else if(a==='setCount')setCount(btn.dataset.count);
+  else if(a==='setRound'){state.currentRound=btn.dataset.round;saveState();render();}
+  else if(a==='addRound')addRound();
+  else if(a==='openSpeech')openSpeech(btn.dataset.player);
+  else if(a==='editSpeech')openSpeech(btn.dataset.player,btn.dataset.note,btn.dataset.round);
+  else if(a==='closeSpeech')closeSpeech();
+  else if(a==='insertPhrase')insertPhrase(btn.dataset.phrase);
+  else if(a==='saveSpeech')saveSpeech();
+  else if(a==='editRole')openRoleEditor(btn.dataset.player);
+  else if(a==='closeRole')closeRole();
+  else if(a==='saveRole')saveRole();
+  else if(a==='toggleVote')toggleVote(Number(btn.dataset.voter),Number(btn.dataset.target));
+  else if(a==='abstainVote')setAbstain(Number(btn.dataset.voter));
+  else if(a==='clearVote')clearVote(Number(btn.dataset.voter));
+  else if(a==='addRelation')addRelation();
+  else if(a==='deleteRelation'){state.relations=state.relations.filter(r=>String(r.id)!==String(btn.dataset.id));saveState();renderRelations();}
+  else if(a==='saveEvent')addOrUpdateEvent();
+  else if(a==='editEvent')startEditEvent(btn.dataset.id);
+  else if(a==='deleteEvent'){state.events=state.events.filter(ev=>String(ev.id)!==String(btn.dataset.id));recomputeAlive();saveState();renderSpeech();renderTimeline();showToast('事件已刪除');}
+  else if(a==='cancelEventEdit')cancelEventEdit();
+  else if(a==='summary')openSummary();
+  else if(a==='closeSummary')document.getElementById('summaryModal').classList.remove('open');
+  else if(a==='copySummary')copySummary();
+  else if(a==='downloadSummary')downloadSummary();
+  else if(a==='export')exportJSON();
+  else if(a==='import')document.getElementById('importFile').click();
+  else if(a==='reset')resetGame();
+});
+document.getElementById('importFile').addEventListener('change',e=>{importJSON(e.target.files?.[0]);e.target.value='';});
+['speechModal','roleModal','summaryModal'].forEach(id=>document.getElementById(id).addEventListener('click',e=>{if(e.target.id===id){document.getElementById(id).classList.remove('open');if(id==='speechModal'){modalPlayerId=null;editingNoteId=null;editingNoteRound=null;}if(id==='roleModal')rolePlayerId=null;}}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSpeech();closeRole();document.getElementById('summaryModal').classList.remove('open');}});
+render();
+</script>
+</body>
+</html>
